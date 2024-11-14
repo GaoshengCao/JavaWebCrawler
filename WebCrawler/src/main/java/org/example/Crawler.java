@@ -13,42 +13,66 @@ import java.util.Set;
 
 public class Crawler {
 
-    // Set to store visited URLs to avoid re-crawling them
+    // Set in cui sono registrati gli URL visitati
     private Set<String> visited = new HashSet<>();
-    // Queue to store URLs to be crawled
-    private Queue<String> toCrawl = new LinkedList<>();
+    // Coda di URL da visitare e la loro profondità rispetto a quella principale
+    private Queue<CoppiaUrlProfondita> toCrawl = new LinkedList<>();
 
-    // Max number of pages to crawl
-    private static final int MAX_PAGES_TO_CRAWL = 100;
+    // Numero di pagina da vedere
+    private static final int MAX_PAGES_TO_CRAWL = 1000;
+    // Profondità massima
+    private static final int MAX_DEPTH = 3;
 
     public void crawl(String startingUrl) {
-        toCrawl.add(startingUrl);
+        // Inizio con Creando il primo URL e la sua profondità
+        toCrawl.add(new CoppiaUrlProfondita(startingUrl, 0));
 
         while (!toCrawl.isEmpty() && visited.size() < MAX_PAGES_TO_CRAWL) {
-            String url = toCrawl.poll();
-            if (!visited.contains(url)) {
-                System.out.println("Crawling: " + url);
+            CoppiaUrlProfondita current = toCrawl.poll();
+            String url = current.url;
+            int depth = current.depth;
+
+            // Controllo se è stato già visitato e se la profondità è acettabile
+            if (!visited.contains(url) && depth <= MAX_DEPTH) {
+                System.out.println("Link : " + url + " | Profontià : " + depth);
                 visited.add(url);
+
                 try {
-                    // Fetch and parse the page using Jsoup
+                    // eseguo il get per ottenere la pagina
                     Document doc = Jsoup.connect(url).get();
-                    // Extract links from the page
-                    extractLinks(doc);
+                    // Extract links from the page if we haven't reached max depth
+                    if (depth < MAX_DEPTH) {
+                        extractLinks(doc, depth + 1);
+                    }
                 } catch (IOException e) {
-                    System.out.println("Failed to crawl " + url);
+                    System.out.println("Errore in " + url);
                 }
             }
         }
     }
 
-    // Method to extract all links from a page and add them to the crawl queue
-    private void extractLinks(Document document) {
-        Elements links = document.select("a[href]");  // Select all anchor tags with href attribute
+    // Metodo per ottenere i link della pagina e inserirli nella coda di pagine da visitare.
+    private void extractLinks(Document document, int depth) {
+        // Ottengo tutti gli elementi link
+        Elements links = document.select("a[href]");
         for (Element link : links) {
-            String linkUrl = link.absUrl("href"); // Get absolute URL
+            // Ottengo Url Assoluto
+            String linkUrl = link.absUrl("href");
             if (!visited.contains(linkUrl)) {
-                toCrawl.add(linkUrl);
+                // Inserisco i link nella coda con la loro profondità
+                toCrawl.add(new CoppiaUrlProfondita(linkUrl, depth));
             }
+        }
+    }
+
+    // Coppia URL e profondità a cui si trova
+    private static class CoppiaUrlProfondita {
+        String url;
+        int depth;
+
+        CoppiaUrlProfondita(String url, int depth) {
+            this.url = url;
+            this.depth = depth;
         }
     }
 }
