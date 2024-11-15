@@ -42,7 +42,7 @@ public class Crawler {
                     Document doc = Jsoup.connect(url).get();
                     // Extract links from the page if we haven't reached max depth
                     if (depth < MAX_DEPTH) {
-                        extractLinks(doc, depth + 1);
+                        prendiLink(doc, depth + 1);
                     }
                 } catch (IOException e) {
                     System.out.println("Errore in " + url);
@@ -52,7 +52,7 @@ public class Crawler {
     }
 
     // Metodo per ottenere i link della pagina e inserirli nella coda di pagine da visitare.
-    private void extractLinks(Document document, int depth) {
+    private void prendiLink(Document document, int depth) {
         // Ottengo tutti gli elementi link
         Elements links = document.select("a[href]");
         for (Element link : links) {

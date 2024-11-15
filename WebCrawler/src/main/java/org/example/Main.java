@@ -5,10 +5,11 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        Crawler crawler = new Crawler();
-        System.out.println("Url pagina:");
-        Scanner scanner = new Scanner(System.in);
-        String url = scanner.nextLine();
-        crawler.crawl("https://" + url);
+        Scraper scrap = new Scraper();
+//        System.out.println("Url pagina:");
+//        Scanner scanner = new Scanner(System.in);
+//        String url = scanner.nextLine();
+        String url = "imdb.com/chart/top/";
+        scrap.setlist("https://" + url);
     }
 }
