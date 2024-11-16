@@ -17,22 +17,13 @@ public class Scraper {
         try {
             Document doc = Jsoup.connect(startingUrl).get();
             prendiLinks(doc);
+            prendiAnnoRilascio(doc);
+            prendiAnnoRilascio(doc);
+            prendiDurata(doc);
         } catch (IOException e) {
             System.out.println("Errore in " + startingUrl);
         }
 
-    }
-
-    public void insertList(){
-        while(!toCrawl.isEmpty()){
-            String url = toCrawl.poll();
-            try {
-                Document doc = Jsoup.connect(url).get();
-                prendiDati(doc);
-            } catch (IOException e) {
-                System.out.println("Errore in " + url);
-            }
-        }
     }
 
     private void prendiLinks(Document document) {
@@ -56,6 +47,7 @@ public class Scraper {
         StringBuilder risposta = new StringBuilder();
         for (int i = 1; i < parti.length; i++) {
             risposta.append(parti[i]);
+            risposta.append(" ");
         }
         return risposta.toString();
     }
@@ -66,8 +58,84 @@ public class Scraper {
         int number = Integer.parseInt(cleanedString);
         return number;
     }
-    private void prendiDati(Document document) {
+    private void prendiAnnoRilascio(Document document) {
+        Elements links = document.select("span.cli-title-metadata-item");
+        Queue<Integer> anno = new LinkedList<>();
+        int n = 0;
+        for (Element link : links) {
+            if( n == 0){
+                int annoUscita = Integer.parseInt(link.text());
+                anno.add(annoUscita);
+                n = 2;
+            }else
+            {
+                n--;
+            }
+        }
+        for (int i = 0; i < films.size(); i++) {
+            Film film = films.get(i);
+            film.setAnno_Rilascio(anno.poll());
+            films.set(i, film);
+        }
+    }
 
+    //TODO
+    private void prendiDurata(Document document) {
+        Elements links = document.select("span.cli-title-metadata-item");
+        Queue<Integer> durata = new LinkedList<>();
+        int n = 1;
+        for (Element link : links) {
+            if( n == 0){
+                String durata_testo = link.text();
+
+                String[] parti = durata_testo.split(" ");
+                String ora = parti[0];
+                String minuti = parti[1];
+                String cleanedString = ora.replaceAll("[^0-9]", "");
+                String cleanedString1 = minuti.replaceAll("[^0-9]", "");
+                int h = Integer.parseInt(cleanedString);
+                int min = Integer.parseInt(cleanedString1);
+
+                durata.add(h*60 + min);
+                n = 2;
+            }else
+            {
+                n--;
+            }
+        }
+        for (int i = 0; i < films.size(); i++) {
+            Film film = films.get(i);
+            film.setDurata_Minuti(durata.poll());
+            films.set(i, film);
+        }
+    }
+    //TODO
+    private void prendiRegista() {
+        for (int i = 0; i < films.size(); i++){
+            Film film = films.get(i);
+            try{
+                Document doc = Jsoup.connect(film.URL).get();
+                Elements name = doc.select("a.ipc-metadata-list-item__list-content-item ipc-metadata-list-item__list-content-item--link");
+                for (Element link : name) {
+                    
+                }
+            }catch (Exception e){
+                System.out.println("Errore in " + film.URL);
+            }
+
+
+        }
+//        Elements links = document.select("span.sc-5bc66c50-6 OOdsw cli-title-metadata-item");
+//        Queue<Integer> anno = new LinkedList<>();
+//        for (Element link : links) {
+//            int annoUscita = Integer.parseInt(link.text());
+//            anno.add(annoUscita);
+//        }
+//        for (int i = 0; i < films.size(); i++) {
+//            Film film = films.get(i);
+//            film.setAnno_Rilascio(anno.poll());
+//            films.set(i, film);
+//        }
     }
 
 }

@@ -14,4 +14,8 @@ public class Film {
         this.posizione = posizione;
     }
 
+    public void setRegista(String regista) { this.regista = regista; }
+    public void setAnno_Rilascio(int anno_Rilascio) { this.anno_Rilascio = anno_Rilascio; }
+    public void setDurata_Minuti(int durata_Minuti) { this.durata_Minuti = durata_Minuti; }
+
 }
